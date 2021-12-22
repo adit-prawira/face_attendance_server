@@ -1,3 +1,4 @@
 from django.contrib import admin
+from server.models import FaceIdentity
 
-# Register your models here.
+admin.site.register(FaceIdentity)

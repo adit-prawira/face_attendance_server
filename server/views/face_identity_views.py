@@ -33,13 +33,16 @@ class FaceIdentityViewSet(viewsets.ViewSet):
         try:
             faceIdentities = FaceIdentity.objects.all()
             serializedFaceIdentities = FaceIdentitySerializer(faceIdentities, many=True).data
-            faceEncoded = dict()
+
             dataToSend = []
+
             for fi in serializedFaceIdentities:
-                faceEncoded["id"] = fi["id"]
-                faceEncoded["name"] = fi["name"]
-                faceEncoded["encodedFace"] = eval(fi["encodedFace"])
-                dataToSend.append(faceEncoded)
+
+                dataToSend.append({
+                    "id": fi["id"],
+                    "name": fi["name"],
+                    "encodedFace": eval(fi["encodedFace"])
+                })
             return Response(dataToSend, status=status.HTTP_200_OK)
         except:
             errorCode = status.HTTP_500_INTERNAL_SERVER_ERROR
