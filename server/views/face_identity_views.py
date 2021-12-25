@@ -4,13 +4,21 @@ from rest_framework.response import Response
 from server.models import FaceIdentity
 from server.serializer import FaceIdentitySerializer
 from server.errors.error_message import ErrorMessage
+from server.utils.aws_s3_image import AwsS3Image
 import urllib.request
 import face_recognition
 import cv2
 import re
+import os
 
 
 class FaceIdentityViewSet(viewsets.ViewSet):
+    _accessKey = os.environ.get("AWS_ACCESS_KEY")
+    _secretKey = os.environ.get("AWS_SECRET_KEY")
+    _region = os.environ.get("AWS_REGION")
+    _bucketName = os.environ.get("AWS_BUCKET_NAME")
+    s3Image = AwsS3Image(_accessKey, _secretKey, _bucketName, _region)
+
     @classmethod
     def _openImageUrl(cls, imageUrl, readFlag=cv2.IMREAD_COLOR):
         res = (urllib.request.urlopen(imageUrl)).read()
@@ -73,6 +81,8 @@ class FaceIdentityViewSet(viewsets.ViewSet):
     def deleteFaceIdentity(self, request, primaryKey = None):
         try:
             targetIdentity = FaceIdentity.objects.get(id=primaryKey)
+            fileToDelete = targetIdentity.imageUrl.split("/")[-1]
+            self.s3Image.deleteImageFromS3Bucket(fileToDelete)
             targetIdentity.delete()
             return Response({}, status=status.HTTP_204_NO_CONTENT)
         except:
@@ -81,4 +91,26 @@ class FaceIdentityViewSet(viewsets.ViewSet):
             return Response(errorMessage, status=errorCode)
 
     def updateFaceIdentity(self, request, primaryKey=None):
-        pass
+
+        try:
+            targetIdentity = FaceIdentity.objects.get(id=primaryKey)
+            newBody = request.data
+            newName = newBody["name"]
+            oldUrl = targetIdentity.imageUrl
+            splitOldUrl = oldUrl.split("/")
+
+            oldFile = splitOldUrl[-1]
+            fileType = oldFile.split(".")[-1]
+            newFile = re.sub("\s+", "-", newName.lower().strip()) + "." + fileType
+            if oldFile != newFile:
+                self.s3Image.renameImageInS3Bucket(oldFile, newFile)
+            splitOldUrl[-1] = newFile
+            newUrl = ("/").join(splitOldUrl)
+            targetIdentity.name = newName
+            targetIdentity.imageUrl = newUrl
+            targetIdentity.save()
+            return Response({}, status=status.HTTP_204_NO_CONTENT)
+        except:
+            errorCode = status.HTTP_404_NOT_FOUND
+            errorMessage = ErrorMessage("Error: Identity not found", errorCode).getMessageBody()
+            return Response(errorMessage, status=errorCode)
