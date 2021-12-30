@@ -4,6 +4,10 @@ The following repository is the server-side application of the Face Attendance/I
 
 Furthermore, the server-side can manage image data that is stored in the AWS S3 bucket. For every update request to a specific face identity, will update its image data in S3. The same functionality will happen for the deletion process of face identity.
 
+Below is a system diagram that is more or less described how the system works and how the architecture is being structured:
+
+![FaceIdentityProject.drawio](/Users/adityaaaap/Desktop/rmit-mc256/my personal data/FaceIdentityProject.drawio.png)
+
 ## How to use the API?
 
 You are required to create a **.env** file that will store your Django secret key and **having an AWS account is a prerequisite** as you create your S3 bucket, access key, and its secret key. Below is the sample of content that should be put inside the **.env** file: 
