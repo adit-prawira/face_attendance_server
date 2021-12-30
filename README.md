@@ -6,7 +6,7 @@ Furthermore, the server-side can manage image data that is stored in the AWS S3 
 
 Below is a system diagram that is more or less described how the system works and how the architecture is being structured:
 
-![FaceIdentityProject.drawio](/Users/adityaaaap/Desktop/rmit-mc256/my personal data/FaceIdentityProject.drawio.png)
+![FaceIdentityProject drawio](https://user-images.githubusercontent.com/61646199/147730210-25c12ff7-9ad2-4240-a2a5-a7c9c2424a30.png)
 
 ## How to use the API?
 
